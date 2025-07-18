@@ -10,9 +10,10 @@ import (
 )
 
 type FileStats struct {
-	ByteCount int
-	LineCount int
-	WordCount int
+	ByteCount      int
+	LineCount      int
+	WordCount      int
+	CharacterCount int
 }
 
 func GetFile(fileName string) *os.File {
@@ -28,12 +29,12 @@ func GetFile(fileName string) *os.File {
 func GetContentStatistics(br *bufio.Reader) FileStats {
 	fileInformation := FileStats{}
 
-	whitespace_characters := []byte{0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x20}
+	whitespace_characters := []rune{0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x20}
 
 	in_word := false
 
 	for {
-		ch, err := br.ReadByte()
+		ch, size, err := br.ReadRune()
 
 		if err != nil && errors.Is(err, io.EOF) {
 			break
@@ -43,7 +44,9 @@ func GetContentStatistics(br *bufio.Reader) FileStats {
 			panic(err)
 		}
 
-		fileInformation.ByteCount++
+		fileInformation.CharacterCount++
+
+		fileInformation.ByteCount += size
 
 		if rune(ch) == rune(10) {
 			fileInformation.LineCount++
@@ -72,6 +75,8 @@ func EmitResult(code string, info FileStats, fileName string) {
 		fmt.Printf("%d %s\n", info.LineCount, fileName)
 	case "-w":
 		fmt.Printf("%d %s\n", info.WordCount, fileName)
+	case "-m":
+		fmt.Printf("%d %s\n", info.CharacterCount, fileName)
 	}
 
 }
