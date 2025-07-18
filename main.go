@@ -12,22 +12,17 @@ type FileStats struct {
 	ByteCount int
 }
 
-func main() {
-
-	args := os.Args[1:]
-
-	if len(args) == 0 {
-		panic("You must include a file or flags to read from")
-	}
-
-	f, err := os.Open("./test_file.txt")
+func GetFile(fileName string) *os.File {
+	f, err := os.Open(fileName)
 
 	if err != nil {
 		panic(err)
 	}
 
-	br := bufio.NewReader(f)
+	return f
+}
 
+func GetContentStatistics(br *bufio.Reader) FileStats {
 	fileInformation := FileStats{}
 
 	for {
@@ -45,5 +40,24 @@ func main() {
 
 	}
 
-	fmt.Printf("%d %s\n", fileInformation.ByteCount, "./test_file.txt")
+	return fileInformation
+}
+
+func main() {
+
+	args := os.Args[1:]
+
+	if len(args) == 0 {
+		panic("You must include a file or flags to read from")
+	}
+
+	fileName := args[1]
+
+	f := GetFile(fileName)
+
+	br := bufio.NewReader(f)
+
+	fileInformation := GetContentStatistics(br)
+
+	fmt.Printf("%d %s\n", fileInformation.ByteCount, fileName)
 }
