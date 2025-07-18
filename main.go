@@ -8,7 +8,18 @@ import (
 	"os"
 )
 
+type FileStats struct {
+	ByteCount int
+}
+
 func main() {
+
+	args := os.Args[1:]
+
+	if len(args) == 0 {
+		panic("You must include a file or flags to read from")
+	}
+
 	f, err := os.Open("./test_file.txt")
 
 	if err != nil {
@@ -17,19 +28,22 @@ func main() {
 
 	br := bufio.NewReader(f)
 
-	for {
-		b, err := br.ReadByte()
+	fileInformation := FileStats{}
 
-		if err != nil && !errors.Is(err, io.EOF) {
+	for {
+		_, err := br.ReadByte()
+
+		if err != nil && errors.Is(err, io.EOF) {
+			break
+		}
+
+		if err != nil {
 			panic(err)
 		}
 
-		fmt.Printf("%c", b)
+		fileInformation.ByteCount += 1
 
-		if err != nil {
-			break
-		}
 	}
 
-	fmt.Println("Hello, World")
+	fmt.Printf("%d %s\n", fileInformation.ByteCount, "./test_file.txt")
 }
